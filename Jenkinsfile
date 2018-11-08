@@ -54,8 +54,32 @@ pipeline {
       steps {
         container('kubectl') {
           sh "sed -i 's#image: .*#image: ${env.TAG_DEV}#' manifest/carts.yml"
+          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${env.VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
           sh "kubectl -n dev apply -f manifest/carts.yml"
         }
+      }
+    }
+    stage('DT Deploy Event') {
+      when {
+          expression {
+          return env.BRANCH_NAME ==~ 'release/.*' || env.BRANCH_NAME ==~'master'
+          }
+      }
+      steps {
+          createDynatraceDeploymentEvent(
+          envId: 'Dynatrace Tenant',
+          tagMatchRules: [
+              [
+              meTypes: [
+                  [meType: 'SERVICE']
+              ],
+              tags: [
+                  [context: 'CONTEXTLESS', key: 'app', value: "${env.APP_NAME}"],
+                  [context: 'CONTEXTLESS', key: 'environment', value: 'dev']
+              ]
+              ]
+          ]) {
+          }
       }
     }
     stage('Run health check in dev') {
