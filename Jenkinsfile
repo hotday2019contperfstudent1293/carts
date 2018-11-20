@@ -45,6 +45,7 @@ pipeline {
         }
       }
     }
+    /*
     stage('Deploy to dev namespace') {
       when {
         expression {
@@ -143,6 +144,7 @@ pipeline {
         }
       }
     }
+    */
     stage('Mark artifact for staging namespace') {
       when {
         expression {
