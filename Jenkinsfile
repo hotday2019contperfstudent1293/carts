@@ -42,7 +42,9 @@ pipeline {
       steps {
         container('docker') {
           withCredentials([usernamePassword(credentialsId: 'docker-registry', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
-            sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000 && docker tag ${env.TAG_DEV} ${env.TAG_DEV}:latest && docker push ${env.TAG_DEV}:latest"
+            sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
+            sh "docker tag ${env.TAG_DEV} ${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}" 
+            sh "docker push ${env.TAG_DEV}:latest"
           }
         }
       }
