@@ -7,7 +7,7 @@ pipeline {
   environment {
     APP_NAME = "carts"
     VERSION = readFile 'version'
-    ARTEFACT_ID = "sockshop-" + "${env.APP_NAME}"
+    ARTEFACT_ID = "sockshop/" + "${env.APP_NAME}"
     TAG = "${env.DOCKER_REGISTRY_URL}:5000/dev/${env.ARTEFACT_ID}"
     TAG_DEV = "${env.TAG}-${env.VERSION}-${env.BUILD_NUMBER}"
     TAG_STAGING = "${env.TAG}-${env.VERSION}"
@@ -42,9 +42,7 @@ pipeline {
       steps {
         container('docker') {
           withCredentials([usernamePassword(credentialsId: 'docker-registry', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
-            sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
-            sh "docker tag ${env.TAG_DEV} ${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}" 
-            sh "docker push ${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
+            sh "docker push ${env.TAG_DEV}"
           }
         }
       }
