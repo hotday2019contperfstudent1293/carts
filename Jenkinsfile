@@ -49,7 +49,7 @@ pipeline {
         }
       }
     }
-    /*
+    
     stage('Deploy to dev namespace') {
       when {
         expression {
@@ -64,6 +64,7 @@ pipeline {
         }
       }
     }
+    /*
     stage('DT Deploy Event') {
       when {
           expression {
