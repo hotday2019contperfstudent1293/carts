@@ -42,7 +42,10 @@ pipeline {
       steps {
         container('docker') {
           withCredentials([usernamePassword(credentialsId: 'docker-registry', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
-            sh "docker push ${env.TAG_DEV}"
+            sh "docker login -u ${USER} -p ${TOKEN}"
+            sh "docker tag ${env.TAG_DEV} dynatracesockshop/carts:0.5.0"
+            sh "docker push dynatracesockshop/carts:0.5.0"
+            /* sh "docker push ${env.TAG_DEV}" */
           }
         }
       }
