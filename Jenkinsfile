@@ -41,9 +41,7 @@ pipeline {
       }
       steps {
         container('docker') {
-          withCredentials([usernamePassword(credentialsId: 'docker-registry', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
-            sh "docker push ${env.TAG_DEV}"
-          }
+          sh "docker push ${env.TAG_DEV}"
         }
       }
     }
