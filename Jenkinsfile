@@ -8,9 +8,9 @@ pipeline {
     APP_NAME = "carts"
     VERSION = readFile 'version'
     ARTEFACT_ID = "sockshop-" + "${env.APP_NAME}"
-    TAG = "${env.DOCKER_REGISTRY_URL}:5000/dev/${env.ARTEFACT_ID}"
+    TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
     TAG_DEV = "${env.TAG}"
-    TAG_STAGING = "${env.TAG}-${env.VERSION}"
+    TAG_STAGING = "${env.TAG}:${env.VERSION}"
   }
   stages {
     stage('Maven build') {
