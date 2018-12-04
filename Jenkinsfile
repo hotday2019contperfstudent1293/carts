@@ -6,10 +6,10 @@ pipeline {
   }
   environment {
     APP_NAME = "carts"
-    VERSION = readFile 'version'
+    VERSION = readFile('version').trim()
     ARTEFACT_ID = "sockshop-" + "${env.APP_NAME}"
     TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
-    TAG_DEV = "${env.TAG}"
+    TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
     TAG_STAGING = "${env.TAG}:${env.VERSION}"
   }
   stages {
@@ -43,8 +43,8 @@ pipeline {
         container('docker') {
           withCredentials([usernamePassword(credentialsId: 'registry-creds', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
             sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
-            sh "docker tag ${env.TAG_DEV} ${env.TAG_DEV}:latest"
-            sh "docker push ${env.TAG_DEV}:latest"
+            sh "docker tag ${env.TAG_DEV} ${env.TAG_DEV}"
+            sh "docker push ${env.TAG_DEV}"
           }
         }
       }
@@ -158,8 +158,11 @@ pipeline {
       }
       steps {
         container('docker'){
-          sh "docker tag ${env.TAG_DEV} ${env.TAG_STAGING}"
-          sh "docker push ${env.TAG_STAGING}"
+          withCredentials([usernamePassword(credentialsId: 'registry-creds', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
+            sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
+            sh "docker tag ${env.TAG_DEV} ${env.TAG_STAGING}"
+            sh "docker push ${env.TAG_STAGING}"
+          }
         }
       }
     }
