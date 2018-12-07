@@ -71,7 +71,7 @@ public class ItemsController {
         }
 
         this.promotionRate = newPromotionRate;
-        LOG.error("new promotion rate set to " + this.prmotionRate);
+        LOG.error("new promotion rate set to " + this.promotionRate);
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -89,7 +89,7 @@ public class ItemsController {
         } catch (Throwable e) {
             // don't do anything
         }
-        LOG.error("Promotion rate: " + this.prmotionRate);
+        LOG.error("Promotion rate: " + this.promotionRate);
         try {
             int promRate = Integer.parseInt(promotionRate);
             if (promRate >= (Math.random() * 100)) {
