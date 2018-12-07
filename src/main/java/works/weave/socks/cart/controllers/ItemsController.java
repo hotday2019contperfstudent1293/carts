@@ -89,14 +89,9 @@ public class ItemsController {
         } catch (Throwable e) {
             // don't do anything
         }
-        try {
-            int promRate = Integer.parseInt(this.promotionRate);
-            LOG.error("Promotion rate: " + promRate);
-            if (promRate >= (Math.random() * 100)) {
-                throw new Exception("promotion campaign not yet implemented");
-            }
-        } catch (Throwable e) {
-            // don't do anything
+        int promRate = Integer.parseInt(promotionRate);
+        if (promRate >= (Math.random() * 100)) {
+            throw new Exception("promotion campaign not yet implemented");
         }
         // If the item does not exist in the cart, create new one in the repository.
         FoundItem foundItem = new FoundItem(() -> cartsController.get(customerId).contents(), () -> item);
