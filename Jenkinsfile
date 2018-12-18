@@ -18,7 +18,7 @@ pipeline {
         checkout([$class: 'GitSCM', 
           branches: [[name: '${env.BRANCH_NAME}']], 
           doGenerateSubmoduleConfigurations: false, 
-          extensions: scm.extenstions, 
+          extensions: [], 
           userRemoteConfigs: scm.userRemoteConfigs
         ])
         container('maven') {
