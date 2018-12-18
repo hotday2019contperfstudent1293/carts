@@ -1,5 +1,11 @@
 @Library('dynatrace@master') _
 
+def _VERSION = 'UNKNOWN'
+def _TAG = 'UNKNOWN'
+def _TAG_DEV = 'UNKNOWN'
+def _TAG_STAGING = 'UNKNOWN'
+
+
 pipeline {
   agent {
     label 'maven'
@@ -22,10 +28,10 @@ pipeline {
           userRemoteConfigs: [[url: "${env.REPOSITORY_NAME}"]]
         ])
         script {
-          def _VERSION = readFile('version').trim()
-          def _TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
-          def _TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
-          def _TAG_STAGING = "${env.TAG}:${env.VERSION}"
+          _VERSION = readFile('version').trim()
+          _TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
+          _TAG_DEV = "${_TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
+          _TAG_STAGING = "${_TAG}:${env.VERSION}"
         }
         container('maven') {
           sh 'mvn -B clean package'
@@ -70,7 +76,7 @@ pipeline {
       steps {
         container('kubectl') {
           sh "sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
-          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${_VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
+          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${env.VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
           sh "kubectl -n dev apply -f manifest/carts.yml"
         }
       }
@@ -189,7 +195,7 @@ pipeline {
           parameters: [
             string(name: 'APP_NAME', value: "${env.APP_NAME}"),
             string(name: 'TAG_STAGING', value: "${_TAG_STAGING}"),
-            string(name: 'VERSION', value: "${_VERSION}")
+            string(name: 'VERSION', value: "${env.VERSION}")
           ]
       }
     }
