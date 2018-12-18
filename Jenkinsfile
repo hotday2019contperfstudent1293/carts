@@ -21,6 +21,9 @@ pipeline {
           extensions: [], 
           userRemoteConfigs: [[url: "${env.REPOSITORY_NAME}"]]
         ])
+        script {
+          VERSION = readFile('version').trim()
+        }
         container('maven') {
           sh 'mvn -B clean package'
         }
