@@ -22,10 +22,10 @@ pipeline {
           userRemoteConfigs: [[url: "${env.REPOSITORY_NAME}"]]
         ])
         script {
-          VERSION = readFile('version').trim()
-          TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
-          TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
-          TAG_STAGING = "${env.TAG}:${env.VERSION}"
+          def _VERSION = readFile('version').trim()
+          def _TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
+          def _TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
+          def _TAG_STAGING = "${env.TAG}:${env.VERSION}"
         }
         container('maven') {
           sh 'mvn -B clean package'
@@ -40,7 +40,7 @@ pipeline {
       }
       steps {
         container('docker') {
-          sh "docker build -t ${env.TAG_DEV} ."
+          sh "docker build -t ${_TAG_DEV} ."
         }
       }
     }
@@ -54,8 +54,8 @@ pipeline {
         container('docker') {
           withCredentials([usernamePassword(credentialsId: 'registry-creds', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
             sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
-            sh "docker tag ${TAG_DEV} ${TAG_DEV}"
-            sh "docker push ${TAG_DEV}"
+            sh "docker tag ${_TAG_DEV} ${_TAG_DEV}"
+            sh "docker push ${_TAG_DEV}"
           }
         }
       }
@@ -69,8 +69,8 @@ pipeline {
       }
       steps {
         container('kubectl') {
-          sh "sed -i 's#image: .*#image: ${TAG_DEV}#' manifest/carts.yml"
-          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
+          sh "sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
+          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${_VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
           sh "kubectl -n dev apply -f manifest/carts.yml"
         }
       }
@@ -171,8 +171,8 @@ pipeline {
         container('docker'){
           withCredentials([usernamePassword(credentialsId: 'registry-creds', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
             sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
-            sh "docker tag ${TAG_DEV} ${TAG_STAGING}"
-            sh "docker push ${TAG_STAGING}"
+            sh "docker tag ${_TAG_DEV} ${_TAG_STAGING}"
+            sh "docker push ${_TAG_STAGING}"
           }
         }
       }
@@ -188,8 +188,8 @@ pipeline {
         build job: "k8s-deploy-staging",
           parameters: [
             string(name: 'APP_NAME', value: "${env.APP_NAME}"),
-            string(name: 'TAG_STAGING', value: "${TAG_STAGING}"),
-            string(name: 'VERSION', value: "${VERSION}")
+            string(name: 'TAG_STAGING', value: "${_TAG_STAGING}"),
+            string(name: 'VERSION', value: "${_VERSION}")
           ]
       }
     }
