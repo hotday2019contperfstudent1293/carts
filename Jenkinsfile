@@ -30,11 +30,11 @@ pipeline {
         script {
           _VERSION = readFile('version').trim()
           _TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
-          _TAG_DEV = "${_TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
-          _TAG_STAGING = "${_TAG}:${env.VERSION}"
+          _TAG_DEV = "${_TAG}:${_VERSION}-${env.BUILD_NUMBER}"
+          _TAG_STAGING = "${_TAG}:${_VERSION}"
         }
         container('maven') {
-          sh "cd ${env.APP_NAME} && mvn -B clean package"
+          sh 'mvn -B clean package'
         }
       }
     }
@@ -46,7 +46,7 @@ pipeline {
       }
       steps {
         container('docker') {
-          sh "dcd ${env.APP_NAME} && ocker build -t ${_TAG_DEV} ."
+          sh "docker build -t ${_TAG_DEV} ."
         }
       }
     }
@@ -59,9 +59,9 @@ pipeline {
       steps {
         container('docker') {
           withCredentials([usernamePassword(credentialsId: 'registry-creds', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
-            sh "cd ${env.APP_NAME} && docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
-            sh "cd ${env.APP_NAME} && docker tag ${_TAG_DEV} ${_TAG_DEV}"
-            sh "cd ${env.APP_NAME} && docker push ${_TAG_DEV}"
+            sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
+            sh "docker tag ${_TAG_DEV} ${_TAG_DEV}"
+            sh "docker push ${_TAG_DEV}"
           }
         }
       }
@@ -75,9 +75,9 @@ pipeline {
       }
       steps {
         container('kubectl') {
-          sh "cd ${env.APP_NAME} && sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
-          sh "cd ${env.APP_NAME} && sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${env.VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
-          sh "cd ${env.APP_NAME} && kubectl -n dev apply -f manifest/carts.yml"
+          sh "sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
+          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${env.VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
+          sh "kubectl -n dev apply -f manifest/carts.yml"
         }
       }
     }
@@ -176,9 +176,9 @@ pipeline {
       steps {
         container('docker'){
           withCredentials([usernamePassword(credentialsId: 'registry-creds', passwordVariable: 'TOKEN', usernameVariable: 'USER')]) {
-            sh "cd ${env.APP_NAME} && docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
-            sh "cd ${env.APP_NAME} && docker tag ${_TAG_DEV} ${_TAG_STAGING}"
-            sh "cd ${env.APP_NAME} && docker push ${_TAG_STAGING}"
+            sh "docker login --username=anything --password=${TOKEN} ${env.DOCKER_REGISTRY_URL}:5000"
+            sh "docker tag ${_TAG_DEV} ${_TAG_STAGING}"
+            sh "docker push ${_TAG_STAGING}"
           }
         }
       }
@@ -195,7 +195,7 @@ pipeline {
           parameters: [
             string(name: 'APP_NAME', value: "${env.APP_NAME}"),
             string(name: 'TAG_STAGING', value: "${_TAG_STAGING}"),
-            string(name: 'VERSION', value: "${_VERSION}")
+            string(name: 'VERSION', value: "${env.VERSION}")
           ]
       }
     }
