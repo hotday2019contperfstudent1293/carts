@@ -15,7 +15,13 @@ pipeline {
   stages {
     stage('Maven build') {
       steps {
-        checkout scm
+        checkout([$class: 'GitSCM', 
+          branches: [[name: "${env.BRANCH_NAME}"]], 
+          doGenerateSubmoduleConfigurations: false, 
+          extensions: [], 
+          submoduleCfg: [], 
+          userRemoteConfigs: [[]]
+        ])
         container('maven') {
           sh 'mvn -B clean package'
         }
