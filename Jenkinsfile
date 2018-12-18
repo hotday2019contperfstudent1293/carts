@@ -76,7 +76,7 @@ pipeline {
       steps {
         container('kubectl') {
           sh "sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
-          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${env.VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
+          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${_VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
           sh "kubectl -n dev apply -f manifest/carts.yml"
         }
       }
@@ -195,7 +195,7 @@ pipeline {
           parameters: [
             string(name: 'APP_NAME', value: "${env.APP_NAME}"),
             string(name: 'TAG_STAGING', value: "${_TAG_STAGING}"),
-            string(name: 'VERSION', value: "${env.VERSION}")
+            string(name: 'VERSION', value: "${_VERSION}")
           ]
       }
     }
