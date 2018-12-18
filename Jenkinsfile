@@ -22,10 +22,10 @@ pipeline {
           userRemoteConfigs: [[url: "${env.REPOSITORY_NAME}"]]
         ])
         script {
-          VERSION = readFile('version').trim()
-            TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
-            TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
-            TAG_STAGING = "${env.TAG}:${env.VERSION}"
+          env.VERSION = readFile('version').trim()
+          env.TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
+          env.TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
+          env.TAG_STAGING = "${env.TAG}:${env.VERSION}"
         }
         container('maven') {
           sh 'mvn -B clean package'
