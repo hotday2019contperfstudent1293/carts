@@ -18,9 +18,8 @@ pipeline {
         checkout([$class: 'GitSCM', 
           branches: [[name: '${env.BRANCH_NAME}']], 
           doGenerateSubmoduleConfigurations: false, 
-          extensions: [], 
-          submoduleCfg: [], 
-          userRemoteConfigs: [[]]
+          extensions: scm.extenstions, 
+          userRemoteConfigs: scm.userRemoteConfigs
         ])
         container('maven') {
           sh 'mvn -B clean package'
