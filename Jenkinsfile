@@ -18,14 +18,12 @@ pipeline {
     stage('Maven build') {
       steps {
         // checkout scm
-        
         checkout([$class: 'GitSCM', 
           branches: [[name: "${env.BRANCH_NAME}"]], 
           doGenerateSubmoduleConfigurations: false, 
           extensions: [], 
           userRemoteConfigs: [[url: "https://github.com/${env.GITHUB_ORGANIZATION}/${env.APP_NAME}"]]
         ])
-        
         script {
           _VERSION = readFile('version').trim()
           _TAG = "${env.DOCKER_REGISTRY_URL}:5000/sockshop-registry/${env.ARTEFACT_ID}"
