@@ -19,7 +19,7 @@ pipeline {
           branches: [[name: '${env.BRANCH_NAME}']], 
           doGenerateSubmoduleConfigurations: false, 
           extensions: [], 
-          userRemoteConfigs: scm.userRemoteConfigs
+          userRemoteConfigs: [[url: '${env.REPOSITORY_NAME}']]
         ])
         container('maven') {
           sh 'mvn -B clean package'
