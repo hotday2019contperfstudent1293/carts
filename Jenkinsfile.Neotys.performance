@@ -1,0 +1,102 @@
+@Library('dynatrace@master') _
+
+pipeline
+{
+  agent
+  {
+    label 'git'
+  }
+  environment
+  {
+    APP_NAME = "carts"
+    TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
+    TAG_STAGING = "${env.TAG}:${env.VERSION}"
+    DYNATRACEID="${env.DT_ACCOUNTID}"
+    DYNATRACEAPIKEY="${env.DT_API_TOKEN}"
+    NLAPIKEY="${env.NL_WEB_API_KEY}"
+    OUTPUTSANITYCHECK="$WORKSPACE/infrastructure/sanitycheck.json"
+    DYNATRACEPLUGINPATH="$WORKSPACE/lib/DynatraceIntegration-2.0.11-SNAPSHOT.jar"
+  }
+  stages
+  {
+    stage('Maven build')
+    {
+        steps
+        {
+          checkout scm
+          container('maven')
+          {
+            sh "mvn -B clean package -DdynatraceId=$DYNATRACEID -DneoLoadWebAPIKey=$NLAPIKEY -DdynatraceApiKey=$DYNATRACEAPIKEY -Dtags=${NL_DT_TAG} -DoutPutReferenceFile=$OUTPUTSANITYCHECK -DcustomActionPath=$DYNATRACEPLUGINPATH -DjsonAnomalieDetectionFile=$CARTS_ANOMALIEFILE"
+            sh "chmod -R 777 $WORKSPACE/target/neoload/"          }
+        }
+    }
+     stage('Start NeoLoad infrastructure') {
+
+                steps {
+                        container('kubectl') {
+                            script {
+                             sh "kubectl create -f $WORKSPACE/infrastructure/infrastructure/neoload/lg/docker-compose.yml"
+                            }
+                        }
+                        }
+
+      }
+
+      stage('Performance Check')
+      {
+
+        steps
+        {
+            recordDynatraceSession(
+                  envId: 'Dynatrace Tenant',
+                  testCase: 'loadtest',
+                  tagMatchRules: [
+                    [
+                      meTypes: [
+                        [meType: 'SERVICE']
+                      ],
+                      tags: [
+                        [context: 'CONTEXTLESS', key: 'app', value: "${env.APP_NAME}"],
+                        [context: 'CONTEXTLESS', key: 'environment', value: 'dev']
+                      ]
+                    ]
+                  ]
+            )
+
+          container('neoload')
+          {
+           script
+            {
+                 sh "mkdir -p /home/jenkins/.neotys/neoload"
+                 sh "cp $WORKSPACE/infrastructure/infrastructure/neoload/license.lic /home/jenkins/.neotys/neoload/"
+                 status =sh(script:"/neoload/bin/NeoLoadCmd -project $WORKSPACE/target/neoload/Carts_NeoLoad/Carts_NeoLoad.nlp -testResultName Performance__carts__${BUILD_NUMBER} -description Performance_carts__${BUILD_NUMBER} -nlweb -L  Population_AddItemToCart=$WORKSPACE/infrastructure/infrastructure/neoload/lg/remote.txt -L Population_Dynatrace_Integration=$WORKSPACE/infrastructure/infrastructure/neoload/lg/local.txt -nlwebToken $NLAPIKEY -variables carts_host=${env.APP_NAME}.dev.svc,carts_port=80 -launch Cart_Load -noGUI", returnStatus: true)
+                 if (status != 0) {
+                        currentBuild.result = 'FAILED'
+                        error "Load Test on cart."
+                 }
+
+            }
+          }
+
+
+        perfSigDynatraceReports(
+          envId: 'Dynatrace Tenant',
+          nonFunctionalFailure: 1,
+          specFile: "monspec/${env.APP_NAME}_perfsig.json"
+        )
+      }
+    }
+  }
+   post {
+        always {
+          container('kubectl') {
+                 script {
+                  echo "delete neoload infrastructure"
+                  sh "kubectl delete svc nl-lg -n cicd-neotys"
+                  sh "kubectl delete pod nl-lg -n cicd-neotys --grace-period=0 --force"
+                 }
+          }
+        }
+
+      }
+}
