@@ -11,15 +11,13 @@ pipeline
     APP_NAME = "carts"
     TAG_DEV = "${env.TAG}:${env.VERSION}-${env.BUILD_NUMBER}"
     TAG_STAGING = "${env.TAG}:${env.VERSION}"
-    DYNATRACEID="${env.DT_ACCOUNTID}"
+    DYNATRACEID="${env.DT_ACCOUNTID}.sprint.dynatracelabs.com"
     DYNATRACEAPIKEY="${env.DT_API_TOKEN}"
     NLAPIKEY="${env.NL_WEB_API_KEY}"
     OUTPUTSANITYCHECK="$WORKSPACE/infrastructure/sanitycheck.json"
     DYNATRACEPLUGINPATH="$WORKSPACE/lib/DynatraceIntegration-2.0.11-SNAPSHOT.jar"
     CARTS_ANOMALIEFILE="$WORKSPACE/monspec/carts_anomalieDection.json"
-    NL_DT_TAG="app:${env.APP_NAME},environment:dev"
-
-
+    NL_DT_TAG="[Kubernetes]app:${env.APP_NAME},environment:dev"
   }
   stages
   {
@@ -30,9 +28,8 @@ pipeline
           checkout scm
           container('maven')
           {
-            sh "mvn -f pom.Neotys.xml -B clean package -DdynatraceId=$DYNATRACEID -DneoLoadWebAPIKey=$NLAPIKEY -DdynatraceApiKey=$DYNATRACEAPIKEY -Dtags=${NL_DT_TAG} -DoutPutReferenceFile=$OUTPUTSANITYCHECK -DcustomActionPath=$DYNATRACEPLUGINPATH -DjsonAnomalieDetectionFile=$CARTS_ANOMALIEFILE"
-            sh "chmod -R 777 $WORKSPACE/target/neoload/"          
-          }
+            sh "mvn -B clean package -DdynatraceId=$DYNATRACEID -DneoLoadWebAPIKey=$NLAPIKEY -DdynatraceApiKey=$DYNATRACEAPIKEY -Dtags=${NL_DT_TAG} -DoutPutReferenceFile=$OUTPUTSANITYCHECK -DcustomActionPath=$DYNATRACEPLUGINPATH -DjsonAnomalieDetectionFile=$CARTS_ANOMALIEFILE"
+            sh "chmod -R 777 $WORKSPACE/target/neoload/"          }
         }
     }
      stage('Start NeoLoad infrastructure') {

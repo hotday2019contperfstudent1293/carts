@@ -21,7 +21,7 @@ pipeline {
                 [meType: 'SERVICE']
               ],
               tags: [
-                [context: 'CONTEXTLESS', key: 'app', value: "${env.APP_NAME}"],
+                [context: 'Kubernetes', key: 'app', value: "${env.APP_NAME}"],
                 [context: 'CONTEXTLESS', key: 'environment', value: 'dev']
               ]
             ]
@@ -37,7 +37,7 @@ pipeline {
                 serverPort: 80,
                 checkPath: '/health',
                 vuCount: 10,
-                loopCount: 250,
+                loopCount: 1500,
                 LTN: "PerfCheck_${BUILD_NUMBER}",
                 funcValidation: false,
                 avgRtValidation: 4000

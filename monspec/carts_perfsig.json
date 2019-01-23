@@ -1,36 +1,39 @@
 {
-    "_lowerLimit" : 0,
-    "_upperLimit" : 1000,
     "timeseries" : [
         {
             "timeseriesId" : "com.dynatrace.builtin:service.responsetime",
             "aggregation" : "avg",
-            "tags" : "app:carts,environment:dev",
-            "upperLimit" : 1000
-        },
+            "tags" : "[Kubernetes]app:carts,environment:dev",
+            "upperLimit" : 1000000
+        } 
+    ],
+    "_more_timeseries" : [
         {
             "timeseriesId" : "com.dynatrace.builtin:service.responsetime",
             "aggregation" : "percentile",
-            "tags" : "app:carts,environment:dev",
-            "upperLimit" : 1000
+            "tags" : "[Kubernetes]app:carts,environment:dev",
+            "upperLimit" : 1000000
         },
         {
             "timeseriesId" : "com.dynatrace.builtin:service.requests",
             "aggregation" : "count",
-            "tags" : "app:carts,environment:dev",
-            "lowerLimit" : 1
+            "tags" : "[Kubernetes]app:carts,environment:dev",
+            "lowerLimit" : 1,
+            "upperLimit" : 0
         },
         {
             "timeseriesId" : "com.dynatrace.builtin:service.requestspermin",
             "aggregation" : "count",
-            "tags" : "app:carts,environment:dev",
-            "lowerLimit" : 1
+            "tags" : "[Kubernetes]app:carts,environment:dev",
+            "lowerLimit" : 1,
+            "upperLimit" : 0
         },
         {
             "timeseriesId" : "com.dynatrace.builtin:service.failurerate",
             "aggregation" : "avg",
-            "tags" : "app:carts,environment:dev",
-            "upperLimit" : 0
+            "tags" : "[Kubernetes]app:carts,environment:dev",
+            "upperLimit" : 2,
+            "lowerLimit" : 1
         }
     ]
 }
