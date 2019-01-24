@@ -101,6 +101,7 @@
                         <include>**/Unit*.java</include>
                     </includes>
                     <excludes>
+                        <exclude>**/loadtest/*.java</exclude>
                         <exclude>**/IT*.java</exclude>
                     </excludes>
                 </configuration>
@@ -114,6 +115,7 @@
                         <include>**/IT*.java</include>
                     </includes>
                     <excludes>
+                        <exclude>**/loadtest/*.java</exclude>
                         <exclude>**/Unit*.java</exclude>
                     </excludes>
                 </configuration>
