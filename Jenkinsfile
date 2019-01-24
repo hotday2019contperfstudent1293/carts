@@ -31,6 +31,8 @@ pipeline {
           _TAG_STAGING = "${_TAG}:${_VERSION}"
         }
         container('maven') {
+          // we remove the files we dont for this build as we had issues excluding it through maven!
+          sh "rm /home/jenkins/workspace/sockshop_carts_master/src/test/java/works/weave/socks/cart/loadtest/*.*"
           sh 'mvn -B clean package'
         }
       }
