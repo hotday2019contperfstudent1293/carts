@@ -25,7 +25,7 @@ pipeline {
       steps {
         checkout scm
         container('maven') {
-          sh "mvn -f pom.Neotys.xml -B clean test -DdynatraceId=$DYNATRACEID -DneoLoadWebAPIKey=$NLAPIKEY -DdynatraceApiKey=$DYNATRACEAPIKEY -Dtags=${NL_DT_TAG} -DoutPutReferenceFile=$OUTPUTSANITYCHECK -DcustomActionPath=$DYNATRACEPLUGINPATH -DjsonAnomalieDetectionFile=$CARTS_ANOMALIEFILE"
+          sh "mvn -f pom.Neotys.xml -B clean package -DdynatraceId=$DYNATRACEID -DneoLoadWebAPIKey=$NLAPIKEY -DdynatraceApiKey=$DYNATRACEAPIKEY -Dtags=${NL_DT_TAG} -DoutPutReferenceFile=$OUTPUTSANITYCHECK -DcustomActionPath=$DYNATRACEPLUGINPATH -DjsonAnomalieDetectionFile=$CARTS_ANOMALIEFILE"
           sh "chmod -R 777 $WORKSPACE/target/neoload/"
         }
       }
@@ -66,21 +66,6 @@ pipeline {
         }
       }
       steps {
-        container('kubectl') {
-          sh "sed -i 's#image: .*#image: ${env.TAG_DEV}#' manifest/carts.yml"
-          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${env.VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
-          sh "kubectl -n dev apply -f manifest/carts.yml"
-        }
-      }
-    }
-
-    /*stage('DT Deploy Event') {
-      when {
-          expression {
-          return env.BRANCH_NAME ==~ 'release/.*' || env.BRANCH_NAME ==~'master'
-          }
-      }
-      steps {
           createDynatraceDeploymentEvent(
           envId: 'Dynatrace Tenant',
           tagMatchRules: [
@@ -89,13 +74,20 @@ pipeline {
                   [meType: 'SERVICE']
               ],
               tags: [
-                  [context: 'CONTEXTLESS', key: 'app', value: "${env.APP_NAME}"],
+                  [context: 'Kubernetes', key: 'app', value: "${env.APP_NAME}"],
                   [context: 'CONTEXTLESS', key: 'environment', value: 'dev']
               ]
               ]
-          ])
+          ]) {
+            container('kubectl') {
+              sh "sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
+              sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${_VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
+              sh "kubectl -n dev apply -f manifest/carts.yml"
+            }
+          }
       }
-    }*/
+    }
+
     stage('Start NeoLoad infrastructure') {
 
             steps {

@@ -31,6 +31,8 @@ pipeline {
           _TAG_STAGING = "${_TAG}:${_VERSION}"
         }
         container('maven') {
+          // we remove the files we dont for this build as we had issues excluding it through maven!
+          sh "rm /home/jenkins/workspace/sockshop_carts_master/src/test/java/works/weave/socks/cart/loadtest/*.*"          
           sh 'mvn -B clean package'
         }
       }
@@ -71,21 +73,6 @@ pipeline {
         }
       }
       steps {
-        container('kubectl') {
-          sh "sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
-          sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${_VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
-          sh "kubectl -n dev apply -f manifest/carts.yml"
-        }
-      }
-    }
-    /*
-    stage('DT Deploy Event') {
-      when {
-          expression {
-          return env.BRANCH_NAME ==~ 'release/.*' || env.BRANCH_NAME ==~'master'
-          }
-      }
-      steps {
           createDynatraceDeploymentEvent(
           envId: 'Dynatrace Tenant',
           tagMatchRules: [
@@ -94,14 +81,20 @@ pipeline {
                   [meType: 'SERVICE']
               ],
               tags: [
-                  [context: 'CONTEXTLESS', key: 'app', value: "${env.APP_NAME}"],
+                  [context: 'Kubernetes', key: 'app', value: "${env.APP_NAME}"],
                   [context: 'CONTEXTLESS', key: 'environment', value: 'dev']
               ]
               ]
           ]) {
+            container('kubectl') {
+              sh "sed -i 's#image: .*#image: ${_TAG_DEV}#' manifest/carts.yml"
+              sh "sed -i 's#value: to-be-replaced-by-jenkins.*#value: ${_VERSION}-${env.BUILD_NUMBER}#' manifest/carts.yml"
+              sh "kubectl -n dev apply -f manifest/carts.yml"
+            }
           }
       }
     }
+    /*
     stage('Run health check in dev') {
       when {
         expression {
