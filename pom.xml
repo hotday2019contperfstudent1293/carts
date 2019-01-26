@@ -78,6 +78,16 @@
     <build>
         <finalName>carts</finalName>
         <plugins>
+                  <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                    <configuration>
+                      <excludes>
+                        <exclude>**/loadtest/*.java</exclude>
+                      </excludes>
+                    </configuration>
+                  </plugin>                 
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -91,6 +101,7 @@
                         <include>**/Unit*.java</include>
                     </includes>
                     <excludes>
+                        <exclude>**/loadtest/*.java</exclude>
                         <exclude>**/IT*.java</exclude>
                     </excludes>
                 </configuration>
@@ -104,6 +115,7 @@
                         <include>**/IT*.java</include>
                     </includes>
                     <excludes>
+                        <exclude>**/loadtest/*.java</exclude>
                         <exclude>**/Unit*.java</exclude>
                     </excludes>
                 </configuration>
