@@ -17,9 +17,7 @@ pipeline {
           testCase: 'loadtest',
           tagMatchRules: [
             [
-              meTypes: [
-                [meType: 'SERVICE']
-              ],
+              meTypes: [ [meType: 'SERVICE'] ],
               tags: [
                 [context: 'Kubernetes', key: 'app', value: "${env.APP_NAME}"],
                 [context: 'CONTEXTLESS', key: 'environment', value: 'dev']
@@ -37,7 +35,7 @@ pipeline {
                 serverPort: 80,
                 checkPath: '/health',
                 vuCount: 10,
-                loopCount: 1500,
+                loopCount: 1000,
                 LTN: "PerfCheck_${BUILD_NUMBER}",
                 funcValidation: false,
                 avgRtValidation: 4000
